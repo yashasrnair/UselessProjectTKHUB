@@ -1,86 +1,69 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useState } from "react";
 
-export default function ImageUploader() {
-  const [images, setImages] = useState([]);
-  const formRef = useRef(null);
-  const fileInputRef = useRef(null);
+export default function ImageUploader({ onUploadComplete }) {
+  const [file, setFile] = useState(null);
+  const [type, setType] = useState("plant");
+  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState("");
 
-  const handleFileChange = useCallback((e) => {
-    const files = e.target.files ? Array.from(e.target.files) : [];
-    setImages(files);
-  }, []);
+  const handleUpload = async () => {
+    if (!file) {
+      setStatus("Please select a file first");
+      return;
+    }
 
-  const formData = useMemo(() => {
-    const fd = new FormData();
-    images.forEach((img) => fd.append("images", img));
-    return fd;
-  }, [images]);
+    setLoading(true);
+    setStatus("");
 
-  const handleSubmit = useCallback(
-    async (e) => {
-      e.preventDefault();
-      if (images.length === 0) return;
+    try {
+      const formData = new FormData();
+      formData.append("photo", file);
+      formData.append("type", type);
 
-      try {
-        await fetch("http://localhost:5000/upload", {
-          method: "POST",
-          body: formData,
-        });
+      const res = await fetch("http://localhost:3000/api/upload", {
+        method: "POST",
+        body: formData,
+      });
 
-        if (formRef.current) {
-          formRef.current.reset();
+      const data = await res.json();
+      console.log("Upload response:", data);
+
+      if (data.saved && data.saved._id) {
+        setStatus("Upload successful! 🎉");
+        if (onUploadComplete) {
+          onUploadComplete(data.saved._id);
         }
-        if (fileInputRef.current) {
-          fileInputRef.current.value = "";
-        }
-        setImages([]);
-      } catch {
-        // no-op: handle errors upstream or via toast
+      } else {
+        setStatus("Upload failed. No ID returned.");
       }
-    },
-    [formData, images.length]
-  );
+    } catch (err) {
+      console.error("Upload error:", err);
+      setStatus("Upload error");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="w-full max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
-      <h2 className="mb-4 text-lg font-semibold text-gray-900">Upload Images</h2>
-      
-      <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label
-            htmlFor="file-input"
-            className="block mb-2 text-sm font-medium text-gray-700"
-          >
-            Select Images
-          </label>
-          <input
-            id="file-input"
-            ref={fileInputRef}
-            type="file"
-            multiple
-            accept="image/*"
-            onChange={handleFileChange}
-            className="block w-full px-3 py-2 text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          />
-        </div>
-
-        {images.length > 0 && (
-          <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-sm text-blue-800">
-              {images.length} file{images.length > 1 ? 's' : ''} selected
-            </p>
-          </div>
-        )}
-
-        <button
-          type="submit"
-          disabled={images.length === 0}
-          className="w-full px-4 py-2 text-white font-medium bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-        >
-          Upload Images
-        </button>
-      </form>
+    <div className="flex flex-col items-center gap-4">
+      <input
+        type="file"
+        accept="image/*"
+        onChange={(e) => setFile(e.target.files[0])}
+      />
+      <select value={type} onChange={(e) => setType(e.target.value)}>
+        <option value="plant">Plant</option>
+        <option value="pet">Pet</option>
+        <option value="object">Object</option>
+      </select>
+      <button
+        onClick={handleUpload}
+        disabled={loading}
+        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+      >
+        {loading ? "Uploading..." : "Upload"}
+      </button>
+      {status && <p>{status}</p>}
     </div>
   );
 }
-

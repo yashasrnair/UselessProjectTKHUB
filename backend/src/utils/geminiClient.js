@@ -1,3 +1,4 @@
+// backend/src/utils/geminiClient.js
 const fetch = (...args) =>import("node-fetch").then(({ default: fetch }) => fetch(...args));
 const fs = require("fs");
 const path = require("path");
@@ -7,8 +8,9 @@ async function getGeminiResponse(prompt, imagePath = null) {
     let body;
 
     if (imagePath) {
-      // With image
       const imageData = fs.readFileSync(imagePath, { encoding: "base64" });
+      const ext = path.extname(imagePath).toLowerCase().replace(".", "");
+      const mime = ext === "png" ? "image/png" : "image/jpeg";
 
       body = {
         contents: [
@@ -17,7 +19,7 @@ async function getGeminiResponse(prompt, imagePath = null) {
               { text: prompt },
               {
                 inline_data: {
-                  mime_type: `image/${path.extname(imagePath).substring(1)}`,
+                  mime_type: mime,
                   data: imageData,
                 },
               },
@@ -26,7 +28,6 @@ async function getGeminiResponse(prompt, imagePath = null) {
         ],
       };
     } else {
-      // Text only
       body = {
         contents: [
           {
@@ -48,7 +49,7 @@ async function getGeminiResponse(prompt, imagePath = null) {
     const data = await response.json();
     console.log("Gemini raw response:", JSON.stringify(data, null, 2));
 
-    if (data.candidates && data.candidates[0]?.content?.parts[0]?.text) {
+    if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
       return data.candidates[0].content.parts[0].text.trim();
     }
 

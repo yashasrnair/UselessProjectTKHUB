@@ -1,5 +1,5 @@
 const fs = require("fs");
-const ObjectItem = require("../models/ObjectModel");
+const ObjectItem = require("../models/ObjectItem");
 const { getGeminiResponse } = require("../utils/geminiClient");
 
 exports.uploadImage = async (req, res) => {
@@ -19,7 +19,12 @@ with personality. Avoid generic replies.`;
     });
     await objectItem.save();
 
-    res.json({ mood: reply, saved: objectItem });
+    res.json({
+      _id: saved._id,
+      type: saved.type,
+      personality: saved.personality,
+      mood: saved.mood,
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });
