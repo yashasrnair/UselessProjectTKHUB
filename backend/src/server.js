@@ -11,9 +11,9 @@ const app = express();
 // allow JSON bodies
 app.use(express.json());
 
-// allow CORS from dev frontend (Vite default port 5173)
+// allow CORS from dev frontend (Vite default ports)
 // change/remove origin in production or make it configurable
-app.use(cors({ origin: "http://localhost:5173" }));
+app.use(cors({ origin: ["http://localhost:5173", "http://localhost:5174"] }));
 
 // API routes
 app.use("/api/upload", uploadRoutes);

@@ -28,10 +28,10 @@ export default function ImageUploader({ onUploadComplete }) {
       const data = await res.json();
       console.log("Upload response:", data);
 
-      if (data.saved && data.saved._id) {
+      if (data._id) {
         setStatus("Upload successful! 🎉");
         if (onUploadComplete) {
-          onUploadComplete(data.saved._id);
+          onUploadComplete(data._id);
         }
       } else {
         setStatus("Upload failed. No ID returned.");
