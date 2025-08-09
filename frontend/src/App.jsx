@@ -1,52 +1,62 @@
-import { useState, useEffect, useCallback } from 'react'
-import './App.css'
+import { useCallback, useEffect, useMemo, useState } from 'react';
+
+import './App.css';
+
+import Header from './components/header.jsx';
+import ImageUploader from './components/Image.jsx';
 import Login from './components/login.jsx';
 
 function App() {
-  const [userName, setUserName] = useState("");
-  const [newUser, setNewUser] = useState(true);
+  const [userName, setUserName] = useState(() =>
+    window.localStorage.getItem('userName') || ''
+  );
+
+  const isNewUser = useMemo(() => userName === '', [userName]);
 
   const logout = useCallback(() => {
-    setNewUser(true);
-    setUserName("");
-    window.localStorage.clear();
+    setUserName('');
+    window.localStorage.removeItem('userName');
     window.sessionStorage.clear();
   }, []);
 
   const handleUserName = useCallback((name) => {
     setUserName(name);
-    setNewUser(false);
     window.localStorage.setItem('userName', name);
   }, []);
 
   useEffect(() => {
-    const savedName = window.localStorage.getItem('userName');
-    if (savedName) {
-      setNewUser(false);
-      setUserName(savedName);
-    }
+    // Sync across tabs
+    const onStorage = (e) => {
+      if (e.key === 'userName') {
+        setUserName(e.newValue || '');
+      }
+    };
+
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
   }, []);
 
   return (
     <>
-      {newUser ? (
-        <Login onSubmit={handleUserName} />
+      {isNewUser ? (
+        <>
+          <Login onSubmit={handleUserName} />
+        </>
       ) : (
-        <div className="flex flex-col items-center gap-4 p-6 max-w-md mx-auto">
-          <div className="text-lg font-medium text-white-800">
-            Welcome {userName}
-          </div>
-          <button 
+        <>
+          <Header userName={userName} />
+          <ImageUploader />
+          <button
             onClick={logout}
-            className="px-4 py-2 font-medium text-white bg-red-500 rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors"
+            className="mt-4 px-6 py-2 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600 transition-colors"
           >
             Logout
           </button>
-        </div>
+        </>
       )}
     </>
-  )
+  );
 }
 
-export default App
+export default App;
 
