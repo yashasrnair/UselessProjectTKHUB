@@ -1,33 +1,45 @@
-import { useState,useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import './App.css'
-import Login
+import Login from './components/login.jsx';
 
 function App() {
-  const[userName,setUserName] = useState("");
-  const[newUser,setNewUser] = useState(true);
+  const [userName, setUserName] = useState("");
+  const [newUser, setNewUser] = useState(true);
 
-  const logout(() => {
+  const logout = useCallback(() => {
     setNewUser(true);
     setUserName("");
-    
-  }
+    window.localStorage.clear();
+    window.sessionStorage.clear();
+  }, []);
 
-  const handleUserName = () 
+  const handleUserName = useCallback((name) => {
+    setUserName(name);
+    setNewUser(false);
+    window.localStorage.setItem('userName', name);
+  }, []);
 
   useEffect(() => {
-    let savedName = window.localStorage.getItem('userName');
-    if(savedName){
+    const savedName = window.localStorage.getItem('userName');
+    if (savedName) {
       setNewUser(false);
       setUserName(savedName);
     }
-  },[]);
+  }, []);
 
   return (
     <>
       {newUser ? (
-        <Login onSubmit = {handleUserName} />
+        <Login onSubmit={handleUserName} />
+      ) : (
+        <div>
+          Welcome {userName}
+          <button onClick={logout}>Logout</button>
+        </div>
+      )}
     </>
   )
 }
 
 export default App
+

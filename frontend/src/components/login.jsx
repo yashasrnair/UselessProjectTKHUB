@@ -1,19 +1,21 @@
-import React,{ useState,useEffect } from "react";
+import React, { useState, useCallback } from "react";
 
+function Login({ onSubmit }) {
+  const [userName, setUserName] = useState("");
 
-function Login(){
-  
-  const[userName,setUserName] = useState("");
-
-  const handleClick = () => {
-    setUserName(userName);
+  const handleClick = useCallback(() => {
     onSubmit(userName);
-  }
+  }, [userName, onSubmit]);
 
-  
-  return(
+  return (
     <div>
-      <input type="text" name="userName" placeholder="userName" value={userName}/>
+      <input 
+        type="text" 
+        name="userName" 
+        placeholder="userName" 
+        value={userName}
+        onChange={(e) => setUserName(e.target.value)}
+      />
       <button type="button" onClick={handleClick}>
         Enter
       </button>
@@ -21,4 +23,5 @@ function Login(){
   );
 }
 
-export default Login;
+export default React.memo(Login);
+
