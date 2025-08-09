@@ -44,14 +44,8 @@ function App() {
         </>
       ) : (
         <>
-          <Header userName={userName} />
+          <Header userName={userName} onSubmit={logout} />
           <ImageUploader />
-          <button
-            onClick={logout}
-            className="mt-4 px-6 py-2 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600 transition-colors"
-          >
-            Logout
-          </button>
         </>
       )}
     </>
