@@ -5,6 +5,7 @@ import './App.css';
 import Header from './components/header.jsx';
 import ImageUploader from './components/Image.jsx';
 import Login from './components/login.jsx';
+import Chat from './components/chat.jsx';
 
 function App() {
   const [userName, setUserName] = useState(() =>
@@ -46,6 +47,9 @@ function App() {
         <>
           <Header userName={userName} onSubmit={logout} />
           <ImageUploader />
+        <div className='mt-40 flex justify-center items-center h-48 rounded-lg'>
+          <Chat/>
+        </div>
         </>
       )}
     </>

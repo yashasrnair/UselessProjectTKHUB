@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 
-const menuLeftItems = ['foo', 'bar', 'baz', 'foobar', 'bazbar'];
+const menuLeftItems = [''];
 const menuRightItems = ['Logout'];
 
 const MenuList = memo(function MenuList({ items,onLogoutClick }) {
