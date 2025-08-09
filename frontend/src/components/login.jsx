@@ -1,27 +1,38 @@
-import React, { useState, useCallback } from "react";
+import React, { useCallback, useState } from "react";
 
-function Login({ onSubmit }) {
+const Login = React.memo(({ onSubmit }) => {
   const [userName, setUserName] = useState("");
 
-  const handleClick = useCallback(() => {
+  const handleSubmit = useCallback((e) => {
+    e.preventDefault();
     onSubmit(userName);
   }, [userName, onSubmit]);
 
+  const handleInputChange = useCallback((e) => {
+    setUserName(e.target.value);
+  }, []);
+
   return (
-    <div>
+    <form onSubmit={handleSubmit} className="flex flex-col max-w-md mx-auto gap-4 p-6">
       <input 
         type="text" 
         name="userName" 
         placeholder="userName" 
         value={userName}
-        onChange={(e) => setUserName(e.target.value)}
+        onChange={handleInputChange}
+        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
       />
-      <button type="button" onClick={handleClick}>
+      <button 
+        type="submit"
+        className="w-full px-4 py-2 font-medium text-white bg-blue-500 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+      >
         Enter
       </button>
-    </div>
+    </form>
   );
-}
+});
 
-export default React.memo(Login);
+Login.displayName = "Login";
+
+export default Login;
 
