@@ -1,28 +1,42 @@
+const fetch = (...args) =>import("node-fetch").then(({ default: fetch }) => fetch(...args));
 const fs = require("fs");
 const path = require("path");
-const fetch = (...args) =>
-  import("node-fetch").then(({ default: fetch }) => fetch(...args));
 
-async function getGeminiResponse(prompt, imagePath) {
+async function getGeminiResponse(prompt, imagePath = null) {
   try {
-    const ext = path.extname(imagePath).toLowerCase();
-    const mimeType = ext === ".png" ? "image/png" : "image/jpeg";
-    const imageBase64 = fs.readFileSync(imagePath, { encoding: "base64" });
+    let body;
 
-    const body = {
-      contents: [
-        {
-          parts: [
-            { inline_data: { mime_type: mimeType, data: imageBase64 } },
-            {
-              text: `${prompt}\nRespond in one funny, emotional sentence as if you are this object.`,
-            },
-          ],
-        },
-      ],
-    };
+    if (imagePath) {
+      // With image
+      const imageData = fs.readFileSync(imagePath, { encoding: "base64" });
 
-    const res = await fetch(
+      body = {
+        contents: [
+          {
+            parts: [
+              { text: prompt },
+              {
+                inline_data: {
+                  mime_type: `image/${path.extname(imagePath).substring(1)}`,
+                  data: imageData,
+                },
+              },
+            ],
+          },
+        ],
+      };
+    } else {
+      // Text only
+      body = {
+        contents: [
+          {
+            parts: [{ text: prompt }],
+          },
+        ],
+      };
+    }
+
+    const response = await fetch(
       `${process.env.GEMINI_API_URL}?key=${process.env.GEMINI_API_KEY}`,
       {
         method: "POST",
@@ -31,15 +45,16 @@ async function getGeminiResponse(prompt, imagePath) {
       }
     );
 
-    const data = await res.json();
+    const data = await response.json();
     console.log("Gemini raw response:", JSON.stringify(data, null, 2));
 
-    return (
-      data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-      "Couldn't figure out a mood 😅"
-    );
-  } catch (err) {
-    console.error("Gemini error:", err);
+    if (data.candidates && data.candidates[0]?.content?.parts[0]?.text) {
+      return data.candidates[0].content.parts[0].text.trim();
+    }
+
+    return "Couldn't figure out a mood 😅";
+  } catch (error) {
+    console.error("Gemini error:", error);
     return "Error talking to Gemini API.";
   }
 }

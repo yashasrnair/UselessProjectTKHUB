@@ -7,7 +7,9 @@ exports.uploadImage = async (req, res) => {
     const { type } = req.body;
     if (!req.file) return res.status(400).json({ error: "No image uploaded" });
 
-    const prompt = `You are a ${type} looking at your own photo. Describe your current mood with humor and personality.`;
+    const prompt = `You are a ${type}. Describe your mood in 1 funny, emotional sentence, 
+with personality. Avoid generic replies.`;
+
     const reply = await getGeminiResponse(prompt, req.file.path);
 
     const objectItem = new ObjectItem({
