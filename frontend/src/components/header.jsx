@@ -1,6 +1,5 @@
 // frontend/src/components/header.jsx
 import React, { memo } from "react";
-import { SunIcon, MoonIcon } from "./icons"; // we will add an inline icons object below (or you can paste them directly)
 
 const menuRightItems = ["Logout"];
 
@@ -12,7 +11,7 @@ const MenuList = memo(function MenuList({ items, onLogoutClick }) {
           <a
             href="#"
             onClick={item === "Logout" ? onLogoutClick : undefined}
-            className="px-3 py-2 text-sm rounded-md text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+            className="px-3 py-2 text-gray-700 dark:text-gray-200 hover:text-blue-600 hover:bg-gray-100 dark:hover:text-blue-400 dark:hover:bg-gray-800 rounded-md transition-colors"
           >
             {item}
           </a>
@@ -22,41 +21,70 @@ const MenuList = memo(function MenuList({ items, onLogoutClick }) {
   );
 });
 
-function ThemeToggle({ theme, setTheme }) {
-  const toggle = () => setTheme(theme === "dark" ? "light" : "dark");
-  return (
-    <button
-      onClick={toggle}
-      aria-label="Toggle theme"
-      className="p-2 rounded-md bg-slate-100 dark:bg-slate-800 hover:scale-105 transition"
-    >
-      {theme === "dark" ? <SunSvg /> : <MoonSvg />}
-    </button>
-  );
-}
-
-const Header = memo(function Header({ userName, onSubmit, theme, setTheme }) {
+const Header = memo(function Header({ userName, onSubmit }) {
   const handleLogout = (e) => {
     e.preventDefault();
     onSubmit();
   };
 
+  // Light/Dark theme toggle
+  const toggleTheme = () => {
+    if (document.documentElement.classList.contains("dark")) {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+    } else {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+    }
+  };
+
   return (
-    <header className="w-full px-6 py-4 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm sticky top-0 z-40">
+    <header className="w-full px-6 py-4 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm">
       <div className="flex items-center justify-between max-w-7xl mx-auto">
-        <div className="flex items-center space-x-6">
-          <div className="text-xl font-bold text-blue-600 dark:text-cyan-400">LostSoul</div>
-          <nav className="hidden sm:block">
-            <ul className="flex items-center space-x-4">
-              <li className="text-sm text-slate-600 dark:text-slate-300">Chat · Upload · Memories</li>
-            </ul>
-          </nav>
+        <div className="flex items-center space-x-8">
+          <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+            Chat a LostSoul XD
+          </h1>
         </div>
 
-        <div className="flex items-center space-x-4">
-          <ThemeToggle theme={theme} setTheme={setTheme} />
-          <div className="text-sm text-slate-600 dark:text-slate-300">Welcome, {userName}</div>
+        <div className="flex items-center space-x-6">
+          <button
+            onClick={toggleTheme}
+            className="p-2 rounded-full bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition"
+          >
+            {document.documentElement.classList.contains("dark") ? (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 text-yellow-400"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 2a1 1 0 011 1v2a1 1 0 11-2 0V3a1 1 0 011-1zm4.95 2.05a1 1 0 010 1.414l-1.42 1.42a1 1 0 11-1.414-1.415l1.42-1.419a1 1 0 011.414 0zM17 9a1 1 0 110 2h-2a1 1 0 110-2h2zM4.05 4.05a1 1 0 000 1.414L5.47 6.88a1 1 0 001.415-1.415L5.464 4.05a1 1 0 00-1.414 0zM3 9a1 1 0 000 2H1a1 1 0 000-2h2zm1.05 6.95a1 1 0 011.414 0l1.42 1.42a1 1 0 01-1.415 1.414l-1.419-1.42a1 1 0 010-1.414zM10 15a1 1 0 011 1v2a1 1 0 11-2 0v-2a1 1 0 011-1zm6.95-1.05a1 1 0 000 1.414l1.42 1.42a1 1 0 11-1.415 1.414l-1.419-1.42a1 1 0 000-1.414z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            ) : (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 text-gray-800"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M17.293 13.293A8 8 0 016.707 2.707 8.003 8.003 0 0010 18a8.003 8.003 0 007.293-4.707z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            )}
+          </button>
+
           <MenuList items={menuRightItems} onLogoutClick={handleLogout} />
+          <span className="text-sm text-gray-600 dark:text-gray-300">
+            Welcome, {userName}
+          </span>
         </div>
       </div>
     </header>
@@ -66,20 +94,3 @@ const Header = memo(function Header({ userName, onSubmit, theme, setTheme }) {
 Header.displayName = "Header";
 
 export default Header;
-
-/* Small inline SVGs so you don't need external assets */
-function SunSvg() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path d="M12 4V2M12 22v-2M4 12H2M22 12h-2M5 5l-1.5-1.5M20.5 20.5L19 19M19 5l1.5-1.5M4.5 19.5L6 18" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-      <circle cx="12" cy="12" r="3.2" stroke="currentColor" strokeWidth="1.6"/>
-    </svg>
-  );
-}
-function MoonSvg() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-  );
-}
