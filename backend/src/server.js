@@ -36,7 +36,7 @@ app.get("*", (req, res) => {
 
 // If frontend is built into ../frontend/dist, serve it
 const distPath = path.join(__dirname, "../../frontend/dist");
-const fs = require("fs");
+// const fs = require("fs");
 if (fs.existsSync(distPath)) {
   app.use(express.static(distPath));
   app.get("*", (req, res) => {
