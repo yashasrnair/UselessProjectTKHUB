@@ -6,17 +6,106 @@ const { getGeminiResponse, estimateTokensForText } = require("../utils/geminiCli
 
 const TOKEN_QUOTA = parseInt(process.env.GEMINI_TOKEN_QUOTA || "10000", 10);
 
-// GET /api/objects?owner=alice
-router.get("/", async (req, res) => {
-  const { owner, type } = req.query;
-  const filter = {};
-  if (owner) filter.owner = owner;
-  if (type) filter.type = type;
-  const objects = await ObjectItem.find(filter).select("-__v");
-  res.json(objects);
+/**
+ * Returns a compact summary list of objects for the given owner.
+ * GET /api/objects/owner/:owner
+ * Response: [ { _id, name, type, mood, lastMessage, lastUpdated, tokensUsed } ]
+ */
+router.get("/owner/:owner", async (req, res) => {
+  try {
+    const owner = req.params.owner;
+    if (!owner) return res.status(400).json({ error: "Owner required" });
+
+    const objects = await ObjectItem.find({ owner }).select(
+      "name type mood messages lastUpdated tokensUsed imageUrl"
+    );
+
+    const summary = objects.map((o) => {
+      const lastMsg = (o.messages && o.messages.length) ? o.messages[o.messages.length - 1].text : null;
+      return {
+        _id: o._id.toString(),
+        name: o.name || null,
+        type: o.type,
+        mood: o.mood || null,
+        lastMessage: lastMsg,
+        lastUpdated: o.lastUpdated,
+        tokensUsed: o.tokensUsed || 0,
+        imageUrl: o.imageUrl || null,
+      };
+    });
+
+    res.json(summary);
+  } catch (err) {
+    console.error("Owner list error:", err);
+    res.status(500).json({ error: "Server error" });
+  }
 });
 
-// GET /api/objects/:id
+/**
+ * Create a new blank object/chat (no image) for a user.
+ * POST /api/objects
+ * Body: { type, name?, owner?, personality? }
+ * Returns the created object summary (including _id)
+ */
+router.post("/", async (req, res) => {
+  try {
+    const { type, name, owner, personality } = req.body;
+    if (!type) return res.status(400).json({ error: "type is required" });
+
+    const initialMood = personality ? `A ${personality} mood starter.` : "Waiting for you to say hi.";
+
+    const obj = new ObjectItem({
+      type,
+      name: name || null,
+      owner: owner || null,
+      personality: personality || "random",
+      mood: initialMood,
+      messages: [{ sender: "Object", text: initialMood }],
+      tokensUsed: 0,
+    });
+
+    const saved = await obj.save();
+
+    res.status(201).json({
+      _id: saved._id.toString(),
+      name: saved.name,
+      type: saved.type,
+      mood: saved.mood,
+      personality: saved.personality,
+      owner: saved.owner,
+      lastUpdated: saved.lastUpdated,
+    });
+  } catch (err) {
+    console.error("Create object error:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+/* -------------------------
+   EXISTING ROUTES (kept)
+   ------------------------- */
+
+/**
+ * GET /api/objects?owner=alice&type=plant
+ * Returns full objects (original behavior)
+ */
+router.get("/", async (req, res) => {
+  try {
+    const { owner, type } = req.query;
+    const filter = {};
+    if (owner) filter.owner = owner;
+    if (type) filter.type = type;
+    const objects = await ObjectItem.find(filter).select("-__v");
+    res.json(objects);
+  } catch (err) {
+    console.error("List objects error:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+/**
+ * GET /api/objects/:id
+ */
 router.get("/:id", async (req, res) => {
   try {
     const obj = await ObjectItem.findById(req.params.id);
@@ -28,7 +117,9 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// PATCH /api/objects/:id/name  { name: "Potty", owner: "alice" }
+/**
+ * PATCH /api/objects/:id/name  { name: "Potty", owner: "alice" }
+ */
 router.patch("/:id/name", async (req, res) => {
   try {
     const { name, owner } = req.body;
@@ -44,7 +135,10 @@ router.patch("/:id/name", async (req, res) => {
   }
 });
 
-// POST /api/objects/talk/:id  { message: "Hi" }
+/**
+ * POST /api/objects/talk/:id  { message: "Hi" }
+ * (keeps original behavior, token-quota guarded)
+ */
 router.post("/talk/:id", async (req, res) => {
   try {
     const obj = await ObjectItem.findById(req.params.id);
