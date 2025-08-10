@@ -3,3 +3,19 @@
 @tailwind components;
 @tailwind utilities;
 
+
+:root {
+  --main-red: #d90429;
+  --main-blue: #1d4ed8;
+  --main-white: #ffffff;
+  --main-black: #000000;
+}
+
+.dark {
+  --main-red: #ff004c;
+  --main-blue: #00eaff;
+  --main-white: #ffffff;
+  --main-black: #0a0a0a;
+  --glow: 0 0 10px var(--main-blue), 0 0 20px var(--main-blue),
+          0 0 30px var(--main-blue), 0 0 40px var(--main-red);
+}
