@@ -1,3 +1,4 @@
+// frontend/src/components/login.jsx
 import React, { useCallback, useState } from "react";
 
 const Login = React.memo(({ onSubmit }) => {
@@ -16,40 +17,17 @@ const Login = React.memo(({ onSubmit }) => {
   }, []);
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      <div className="relative w-full max-w-md p-8 bg-slate-800/40 rounded-2xl border border-cyan-500/30 shadow-lg shadow-cyan-500/20 backdrop-blur-xl">
-        {/* Glowing overlay */}
-        <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-cyan-500/10 via-purple-500/10 to-pink-500/10 blur-md -z-10"></div>
+    <div className="flex items-center justify-center min-h-screen bg-gray-50">
+      <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md">
+        <h2 className="mb-6 text-2xl font-bold text-center text-gray-900">Welcome</h2>
 
-        <h2 className="mb-6 text-3xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400">
-          Welcome
-        </h2>
-
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label
-              htmlFor="username"
-              className="block mb-2 text-sm font-medium text-cyan-200"
-            >
-              Username
-            </label>
-            <input
-              id="username"
-              type="text"
-              value={userName}
-              onChange={handleInputChange}
-              placeholder="Enter your username"
-              className="w-full px-4 py-2 text-white bg-slate-900/50 border border-cyan-500/40 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
-              required
-            />
+            <label htmlFor="username" className="block mb-2 text-sm font-medium text-gray-700">Username</label>
+            <input id="username" type="text" value={userName} onChange={handleInputChange} placeholder="Enter your username" className="w-full px-3 py-2 text-gray-900 placeholder-gray-500 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required />
           </div>
 
-          <button
-            type="submit"
-            className="w-full px-4 py-2 font-semibold text-white bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 rounded-lg shadow-md shadow-cyan-500/20 transition-all duration-300 transform hover:scale-105"
-          >
-            Login
-          </button>
+          <button type="submit" className="w-full px-4 py-2 text-white font-medium bg-blue-600 rounded-lg hover:bg-blue-700">Login</button>
         </form>
       </div>
     </div>
@@ -57,4 +35,5 @@ const Login = React.memo(({ onSubmit }) => {
 });
 
 Login.displayName = "Login";
+
 export default Login;
