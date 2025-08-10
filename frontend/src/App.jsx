@@ -5,12 +5,14 @@ import "./App.css";
 import Header from "./components/header.jsx";
 import UploadAndChat from "./components/UploadAndChat.jsx";
 import Login from "./components/login.jsx";
+import Dashboard from "./components/Dashboard.jsx";
 
 function App() {
   const [userName, setUserName] = useState(() =>
     window.localStorage.getItem("userName") || ""
   );
-  const [objectId, setObjectId] = useState(null);
+  const [activeObjectId, setActiveObjectId] = useState(null); // which chat is open
+  const [theme, setTheme] = useState(() => window.localStorage.getItem("theme") || "light");
 
   const isNewUser = useMemo(() => userName === "", [userName]);
 
@@ -18,7 +20,7 @@ function App() {
     setUserName("");
     window.localStorage.removeItem("userName");
     window.sessionStorage.clear();
-    setObjectId(null);
+    setActiveObjectId(null);
   }, []);
 
   const handleUserName = useCallback((name) => {
@@ -31,27 +33,48 @@ function App() {
       if (e.key === "userName") {
         setUserName(e.newValue || "");
       }
+      if (e.key === "theme") {
+        setTheme(e.newValue || "light");
+      }
     };
     window.addEventListener("storage", onStorage);
     return () => window.removeEventListener("storage", onStorage);
   }, []);
 
-  return (
-    <>
-      {isNewUser ? (
-        <Login onSubmit={handleUserName} />
-      ) : (
-        <>
-          <Header userName={userName} onSubmit={logout} />
+  // theme handling: toggles `dark` class on html element and persists
+  useEffect(() => {
+    const html = document.documentElement;
+    if (theme === "dark") {
+      html.classList.add("dark");
+    } else {
+      html.classList.remove("dark");
+    }
+    window.localStorage.setItem("theme", theme);
+  }, [theme]);
 
-          <div className="py-12 px-4">
-            <div className="max-w-4xl mx-auto">
-              <UploadAndChat userName={userName} />
-            </div>
-          </div>
-        </>
-      )}
-    </>
+  if (isNewUser) {
+    return <Login onSubmit={handleUserName} />;
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-black text-slate-900 dark:text-slate-100 transition-colors">
+      <Header
+        userName={userName}
+        onSubmit={logout}
+        theme={theme}
+        setTheme={setTheme}
+      />
+
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Dashboard shows chats + a right panel for chat / upload */}
+        <Dashboard
+          userName={userName}
+          activeObjectId={activeObjectId}
+          setActiveObjectId={setActiveObjectId}
+          onCreateNew={(newId) => setActiveObjectId(newId)}
+        />
+      </main>
+    </div>
   );
 }
 
