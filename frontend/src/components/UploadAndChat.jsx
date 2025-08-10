@@ -6,7 +6,8 @@ export default function UploadAndChat() {
   const [file, setFile] = useState(null);
   const [type, setType] = useState("plant");
   const [loading, setLoading] = useState(false);
-  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+  const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
 
   const handleUpload = async () => {
     if (!file) return alert("Please choose a file!");
@@ -17,7 +18,7 @@ export default function UploadAndChat() {
     formData.append("type", type);
 
     try {
-      const res = await fetch(`${API_URL}/api/upload`, {
+      const res = await fetch(`${API_BASE_URL}/api/upload`, {
         method: "POST",
         body: formData,
       });
