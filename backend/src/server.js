@@ -1,41 +1,22 @@
+// backend/src/server.js
 require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
-const path = require("path");
+const connectDB = require("./config/db"); // optional helper if you used it
 const cors = require("cors");
 const uploadRoutes = require("./routes/uploadRoutes");
 const objectRoutes = require("./routes/objectRoutes");
 
 const app = express();
-
-// allow JSON bodies
+app.use(cors());
 app.use(express.json());
 
-// allow CORS from dev frontend (Vite default ports)
-// change/remove origin in production or make it configurable
-app.use(cors({ origin: ["http://localhost:5173", "http://localhost:5174"] }));
-
-// API routes
+// routes
 app.use("/api/upload", uploadRoutes);
 app.use("/api/objects", objectRoutes);
 
-// Serve frontend build
-app.use(express.static(path.join(__dirname, "../../frontend/dist")));
-
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "../../frontend/dist/index.html"));
-});
-
-// If frontend is built into ../frontend/dist, serve it
-const distPath = path.join(__dirname, "../../frontend/dist");
-const fs = require("fs");
-if (fs.existsSync(distPath)) {
-  app.use(express.static(distPath));
-  app.get("*", (req, res) => {
-    res.sendFile(path.join(distPath, "index.html"));
-  });
-}
-
+app.use(cors({ origin: ["http://localhost:5173", "http://localhost:5174"] }));
+// Try to connect DB (uses MONGO_URI from env)
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB connected"))
