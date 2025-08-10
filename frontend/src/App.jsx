@@ -1,81 +1,48 @@
-// frontend/src/App.jsx
-import { useCallback, useEffect, useMemo, useState } from "react";
-import "./App.css";
+import { useState, useEffect } from "react";
+import Header from "./components/Header";
+import Chat from "./components/Chat";
+import ImageUploader from "./components/ImageUploader";
 
-import Header from "./components/header.jsx";
-import UploadAndChat from "./components/UploadAndChat.jsx";
-import Login from "./components/login.jsx";
-import Dashboard from "./components/Dashboard.jsx";
+export default function App() {
+  const [currentObjectId, setCurrentObjectId] = useState(null);
+  const [view, setView] = useState("chats"); // chats | upload
 
-function App() {
-  const [userName, setUserName] = useState(() =>
-    window.localStorage.getItem("userName") || ""
-  );
-  const [activeObjectId, setActiveObjectId] = useState(null); // which chat is open
-  const [theme, setTheme] = useState(() => window.localStorage.getItem("theme") || "light");
-
-  const isNewUser = useMemo(() => userName === "", [userName]);
-
-  const logout = useCallback(() => {
-    setUserName("");
-    window.localStorage.removeItem("userName");
-    window.sessionStorage.clear();
-    setActiveObjectId(null);
-  }, []);
-
-  const handleUserName = useCallback((name) => {
-    setUserName(name);
-    window.localStorage.setItem("userName", name);
-  }, []);
-
+  // Dark mode persistence
   useEffect(() => {
-    const onStorage = (e) => {
-      if (e.key === "userName") {
-        setUserName(e.newValue || "");
-      }
-      if (e.key === "theme") {
-        setTheme(e.newValue || "light");
-      }
-    };
-    window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
-  }, []);
-
-  // theme handling: toggles `dark` class on html element and persists
-  useEffect(() => {
-    const html = document.documentElement;
-    if (theme === "dark") {
-      html.classList.add("dark");
-    } else {
-      html.classList.remove("dark");
+    if (localStorage.getItem("theme") === "dark") {
+      document.documentElement.classList.add("dark");
     }
-    window.localStorage.setItem("theme", theme);
-  }, [theme]);
-
-  if (isNewUser) {
-    return <Login onSubmit={handleUserName} />;
-  }
+  }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-black text-slate-900 dark:text-slate-100 transition-colors">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
       <Header
-        userName={userName}
-        onSubmit={logout}
-        theme={theme}
-        setTheme={setTheme}
+        userName="User"
+        onSubmit={() => console.log("Logout")}
+        onNewChat={() => setView("upload")} // New Chat → Upload
       />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Dashboard shows chats + a right panel for chat / upload */}
-        <Dashboard
-          userName={userName}
-          activeObjectId={activeObjectId}
-          setActiveObjectId={setActiveObjectId}
-          onCreateNew={(newId) => setActiveObjectId(newId)}
-        />
+      <main className="p-4 max-w-5xl mx-auto">
+        {view === "upload" && (
+          <ImageUploader
+            onUploadComplete={(id) => {
+              setCurrentObjectId(id);
+              setView("chats");
+            }}
+            onBack={() => setView("chats")}
+          />
+        )}
+
+        {view === "chats" && currentObjectId && (
+          <Chat objectId={currentObjectId} />
+        )}
+
+        {view === "chats" && !currentObjectId && (
+          <div className="text-center text-gray-600 dark:text-gray-300">
+            Click "New Chat" to start talking to an object.
+          </div>
+        )}
       </main>
     </div>
   );
 }
-
-export default App;
