@@ -3,27 +3,35 @@
 @tailwind components;
 @tailwind utilities;
 
-
-:root {
-  --bg-color-light: #ffffff;
-  --bg-color-dark: #121212;
-  --text-color-light: #000000;
-  --text-color-dark: #ffffff;
-  --accent-color: #007bff; /* blue accent */
-}
-
 html.light {
-  background-color: var(--bg-color-light);
-  color: var(--text-color-light);
+  --bg-color: #ffffff;
+  --text-color: #000000;
+  --accent-color: #2563eb; /* Tailwind blue-600 */
+  --card-bg: #f9fafb; /* Tailwind gray-50 */
+  --border-color: #e5e7eb; /* Tailwind gray-200 */
 }
 
 html.dark {
-  background-color: var(--bg-color-dark);
-  color: var(--text-color-dark);
+  --bg-color: #121212;
+  --text-color: #ffffff;
+  --accent-color: #3b82f6; /* Tailwind blue-500 */
+  --card-bg: #1f2937; /* Tailwind gray-800 */
+  --border-color: #374151; /* Tailwind gray-700 */
 }
 
 body {
-  background-color: inherit;
-  color: inherit;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.sidebar,
+.chat-container {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+button {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
