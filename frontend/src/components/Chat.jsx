@@ -1,4 +1,5 @@
 import { useState } from "react";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 export default function Chat({ objectId }) {
   const [messages, setMessages] = useState([]);
@@ -15,7 +16,7 @@ export default function Chat({ objectId }) {
 
     try {
       const res = await fetch(
-        `http://localhost:3000/api/objects/talk/${objectId}`,
+        `${API_BASE_URL}/api/objects/talk/${objectId}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
