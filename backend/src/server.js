@@ -14,6 +14,12 @@ app.use(express.json());
 // routes
 app.use("/api/upload", uploadRoutes);
 app.use("/api/objects", objectRoutes);
+// Serve frontend build
+app.use(express.static(path.join(__dirname, "dist")));
+
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "dist", "index.html"));
+});
 
 app.use(cors({ origin: ["http://localhost:5173", "http://localhost:5174"] }));
 // Try to connect DB (uses MONGO_URI from env)
