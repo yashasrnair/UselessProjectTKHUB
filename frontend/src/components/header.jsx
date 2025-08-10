@@ -1,3 +1,4 @@
+// frontend/src/components/Header.jsx
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -5,7 +6,7 @@ export default function Header({ userName, onLogout }) {
   const navigate = useNavigate();
   const [theme, setTheme] = useState(localStorage.getItem("theme") || "light");
 
-  // Apply theme to <html>
+  // Apply theme class to <html> tag
   useEffect(() => {
     document.documentElement.classList.remove("light", "dark");
     document.documentElement.classList.add(theme);
@@ -22,46 +23,29 @@ export default function Header({ userName, onLogout }) {
   };
 
   return (
-    <header
-      style={{
-        padding: "10px 20px",
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        borderBottom: "1px solid var(--accent-color)",
-        backgroundColor: "inherit",
-        color: "inherit",
-      }}
-    >
-      <h1 style={{ margin: 0 }}>Chat a LostSoul XD</h1>
-      <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
-        <button
-          onClick={toggleTheme}
-          style={{
-            background: "none",
-            border: "none",
-            fontSize: "1.4rem",
-            cursor: "pointer",
-            color: "inherit",
-          }}
-          title="Toggle theme"
-        >
-          {theme === "light" ? "🌙" : "☀️"}
-        </button>
-        <span>Welcome, {userName || "User"}</span>
-        <button
-          onClick={handleLogout}
-          style={{
-            backgroundColor: "var(--accent-color)",
-            color: "#fff",
-            border: "none",
-            padding: "6px 12px",
-            borderRadius: "4px",
-            cursor: "pointer",
-          }}
-        >
-          Logout
-        </button>
+    <header className="w-full px-6 py-4 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm">
+      <div className="flex items-center justify-between max-w-7xl mx-auto">
+        <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+          Chat a LostSoul XD
+        </h1>
+        <div className="flex items-center space-x-6">
+          <button
+            onClick={toggleTheme}
+            className="p-2 rounded-full bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition"
+            title="Toggle theme"
+          >
+            {theme === "light" ? "🌙" : "☀️"}
+          </button>
+          <span className="text-sm text-gray-600 dark:text-gray-300">
+            Welcome, {userName || "User"}
+          </span>
+          <button
+            onClick={handleLogout}
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+          >
+            Logout
+          </button>
+        </div>
       </div>
     </header>
   );
