@@ -27,18 +27,21 @@ app.use(cors({
 app.use("/api/upload", uploadRoutes);
 app.use("/api/objects", objectRoutes);
 
-// Serve frontend (React build inside /frontend/dist)
-const distPath = path.join(__dirname, "../frontend/dist");
+// Serve frontend build
+app.use(express.static(path.join(__dirname, "../../frontend/dist")));
 
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../../frontend/dist/index.html"));
+});
+
+// If frontend is built into ../frontend/dist, serve it
+const distPath = path.join(__dirname, "../../frontend/dist");
+const fs = require("fs");
 if (fs.existsSync(distPath)) {
   app.use(express.static(distPath));
-
-  // Catch-all route for SPA (React Router)
   app.get("*", (req, res) => {
     res.sendFile(path.join(distPath, "index.html"));
   });
-} else {
-  console.warn("⚠️  Frontend build not found. Make sure to run `npm run build` in frontend folder.");
 }
 
 // Connect MongoDB
