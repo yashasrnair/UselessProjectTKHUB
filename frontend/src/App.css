@@ -3,22 +3,26 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Remove all gradient background */
+:root {
+  --bg-color-light: #ffffff;
+  --bg-color-dark: #121212;
+  --text-color-light: #000000;
+  --text-color-dark: #ffffff;
+  --accent-color: #007bff; /* blue accent */
+}
+
+html.light {
+  background-color: var(--bg-color-light);
+  color: var(--text-color-light);
+}
+
+html.dark {
+  background-color: var(--bg-color-dark);
+  color: var(--text-color-dark);
+}
+
 body {
-  background-color: white;
-}
-
-html.dark body {
-  background-color: #0f172a; /* dark navy */
-}
-
-/* Accent blue for buttons and links */
-.btn-accent {
-  background-color: #2563eb; /* blue-600 */
-  color: white;
-  transition: all 0.2s ease-in-out;
-}
-
-.btn-accent:hover {
-  background-color: #1d4ed8; /* blue-700 */
+  background-color: inherit;
+  color: inherit;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
