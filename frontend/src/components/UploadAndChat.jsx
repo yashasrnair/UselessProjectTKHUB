@@ -1,51 +1,59 @@
+// frontend/src/components/UploadAndChat.jsx
 import React, { useState } from "react";
-import Chat from "./Chat";
+import Chat from "./Chat.jsx";
 
-export default function UploadAndChat() {
+export default function UploadAndChat({ userName }) {
   const [objectId, setObjectId] = useState(null);
   const [file, setFile] = useState(null);
   const [type, setType] = useState("plant");
   const [loading, setLoading] = useState(false);
+  const [showNamePrompt, setShowNamePrompt] = useState(false);
+  const [pendingObjData, setPendingObjData] = useState(null);
+  const [objName, setObjName] = useState("");
   const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
-
 
   const handleUpload = async () => {
     if (!file) return alert("Please choose a file!");
     setLoading(true);
-
     const formData = new FormData();
     formData.append("photo", file);
     formData.append("type", type);
+    formData.append("userName", userName || "");
 
     try {
       const res = await fetch(`${API_BASE_URL}/api/upload`, {
         method: "POST",
         body: formData,
       });
-
-      if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`);
-      }
-
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
-      console.log("📥 Upload response received:", data);
-      
-      if (data.error) {
-        throw new Error(data.error);
-      }
-      
-      if (!data._id) {
-        throw new Error("No object ID received from server");
-      }
-      
-      console.log("✅ Setting objectId:", data._id);
-      setObjectId(data._id); // Set the chat to open
+      if (!data._id) throw new Error("No object ID from server");
+      // open name prompt
+      setPendingObjData(data);
+      setShowNamePrompt(true);
     } catch (err) {
       console.error("Upload error:", err);
-      alert(`Upload failed: ${err.message}`);
+      alert("Upload failed: " + err.message);
+    } finally {
+      setLoading(false);
     }
+  };
 
-    setLoading(false);
+  const saveNameAndEnterChat = async () => {
+    if (!pendingObjData) return;
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/objects/${pendingObjData._id}/name`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: objName || "Unnamed", owner: userName || null }),
+      });
+      if (!res.ok) throw new Error("Failed to set name");
+      setObjectId(pendingObjData._id);
+      setShowNamePrompt(false);
+    } catch (err) {
+      console.error("Name save failed:", err);
+      alert("Failed to save name: " + err.message);
+    }
   };
 
   if (objectId) {
@@ -53,58 +61,35 @@ export default function UploadAndChat() {
   }
 
   return (
-    <div className="relative max-w-md mx-auto bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 backdrop-blur-xl border border-cyan-500/30 rounded-2xl p-8 shadow-2xl shadow-cyan-500/20">
-      {/* Glowing border effect */}
-      <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 via-purple-500/20 to-pink-500/20 rounded-2xl blur-sm -z-10"></div>
-      
-      <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400 mb-8 text-center tracking-wide">
-        Upload an Object to Chat
-      </h2>
-      
-      <div className="space-y-6">
-        <div className="relative">
-          <select 
-            value={type} 
-            onChange={(e) => setType(e.target.value)}
-            className="w-full bg-slate-800/50 border border-cyan-500/40 rounded-xl px-4 py-3 text-cyan-100 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-400 transition-all duration-300 backdrop-blur-sm appearance-none cursor-pointer hover:bg-slate-700/50"
-          >
-            <option value="plant" className="bg-slate-800 text-cyan-100">🌱 Plant</option>
-            <option value="pet" className="bg-slate-800 text-cyan-100">🐾 Pet</option>
-            <option value="gadget" className="bg-slate-800 text-cyan-100">⚡ Gadget</option>
-          </select>
-          <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none">
-            <svg className="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
-            </svg>
-          </div>
-        </div>
-        
-        <div className="relative">
-          <input 
-            type="file" 
-            onChange={(e) => setFile(e.target.files[0])}
-            className="w-full bg-slate-800/50 border border-cyan-500/40 rounded-xl px-4 py-3 text-cyan-100 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-400 transition-all duration-300 backdrop-blur-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-gradient-to-r file:from-cyan-500 file:to-purple-500 file:text-white file:font-medium hover:file:from-cyan-400 hover:file:to-purple-400 file:cursor-pointer"
-          />
-        </div>
-        
-        <button 
-          onClick={handleUpload} 
-          disabled={loading}
-          className="w-full relative overflow-hidden bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 disabled:from-gray-600 disabled:to-gray-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 disabled:hover:scale-100 disabled:cursor-not-allowed shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40"
-        >
-          <span className="relative z-10">
-            {loading ? (
-              <div className="flex items-center justify-center space-x-2">
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                <span>Uploading...</span>
-              </div>
-            ) : (
-              "Upload & Chat"
-            )}
-          </span>
-          <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
+    <div className="relative bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 rounded-2xl p-8 shadow-xl border border-cyan-500/20">
+      <h2 className="text-2xl font-bold text-white mb-6">Upload an Object to Chat</h2>
+
+      <div className="space-y-4">
+        <select value={type} onChange={(e) => setType(e.target.value)} className="w-full px-4 py-2 rounded bg-slate-800 text-white">
+          <option value="plant">🌱 Plant</option>
+          <option value="pet">🐾 Pet</option>
+          <option value="gadget">⚡ Gadget</option>
+        </select>
+
+        <input type="file" accept="image/*" onChange={(e) => setFile(e.target.files[0])} className="w-full text-white" />
+
+        <button onClick={handleUpload} disabled={loading} className="w-full px-4 py-3 bg-gradient-to-r from-cyan-500 to-purple-600 text-white rounded">
+          {loading ? "Uploading..." : "Upload & Chat"}
         </button>
       </div>
+
+      {showNamePrompt && (
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <div className="bg-slate-900/95 p-6 rounded-lg border border-cyan-500/30">
+            <h3 className="text-lg font-bold mb-2 text-white">Name your object</h3>
+            <input value={objName} onChange={(e) => setObjName(e.target.value)} placeholder="e.g. Pottery Pete" className="w-full px-3 py-2 rounded mb-3" />
+            <div className="flex gap-2">
+              <button onClick={saveNameAndEnterChat} className="px-4 py-2 bg-cyan-500 text-white rounded">Save & Chat</button>
+              <button onClick={() => { setShowNamePrompt(false); setPendingObjData(null); }} className="px-4 py-2 bg-gray-600 text-white rounded">Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
