@@ -15,13 +15,18 @@ app.use(express.json());
 // routes
 app.use("/api/upload", uploadRoutes);
 app.use("/api/objects", objectRoutes);
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 // Serve frontend build
-app.use(express.static(path.join(__dirname, "dist")));
+app.use(express.static(path.join(__dirname, 'client', 'dist')));
 
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "dist", "index.html"));
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'));
 });
-
 app.use(cors({ origin: ["http://localhost:5173", "http://localhost:5174"] }));
 // Try to connect DB (uses MONGO_URI from env)
 mongoose
