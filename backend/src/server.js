@@ -19,6 +19,13 @@ app.use(cors({ origin: ["http://localhost:5173", "http://localhost:5174"] }));
 app.use("/api/upload", uploadRoutes);
 app.use("/api/objects", objectRoutes);
 
+// Serve frontend build
+app.use(express.static(path.join(__dirname, "../../frontend/dist")));
+
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../../frontend/dist/index.html"));
+});
+
 // If frontend is built into ../frontend/dist, serve it
 const distPath = path.join(__dirname, "../../frontend/dist");
 const fs = require("fs");
