@@ -1,14 +1,16 @@
+// frontend/src/App.jsx
 import { useCallback, useEffect, useMemo, useState } from "react";
 import "./App.css";
 
 import Header from "./components/header.jsx";
-import Login from "./components/login.jsx";
 import UploadAndChat from "./components/UploadAndChat.jsx";
+import Login from "./components/login.jsx";
 
 function App() {
   const [userName, setUserName] = useState(() =>
     window.localStorage.getItem("userName") || ""
   );
+  const [objectId, setObjectId] = useState(null);
 
   const isNewUser = useMemo(() => userName === "", [userName]);
 
@@ -16,6 +18,7 @@ function App() {
     setUserName("");
     window.localStorage.removeItem("userName");
     window.sessionStorage.clear();
+    setObjectId(null);
   }, []);
 
   const handleUserName = useCallback((name) => {
@@ -40,8 +43,11 @@ function App() {
       ) : (
         <>
           <Header userName={userName} onSubmit={logout} />
-          <div className="mt-10 flex justify-center">
-            <UploadAndChat />
+
+          <div className="py-12 px-4">
+            <div className="max-w-4xl mx-auto">
+              <UploadAndChat userName={userName} />
+            </div>
           </div>
         </>
       )}
