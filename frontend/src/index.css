@@ -3,3 +3,27 @@
 @tailwind components;
 @tailwind utilities;
 
+
+:root {
+  --bg-color-light: #ffffff;
+  --bg-color-dark: #121212;
+  --text-color-light: #000000;
+  --text-color-dark: #ffffff;
+  --accent-color: #007bff; /* blue accent */
+}
+
+html.light {
+  background-color: var(--bg-color-light);
+  color: var(--text-color-light);
+}
+
+html.dark {
+  background-color: var(--bg-color-dark);
+  color: var(--text-color-dark);
+}
+
+body {
+  background-color: inherit;
+  color: inherit;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
