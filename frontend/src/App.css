@@ -3,31 +3,20 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Light mode */
-html {
-  background-color: #ffffff;
-  color: #111827;
+/* Remove all gradient background */
+body {
+  background-color: white;
 }
 
-/* Dark mode */
-html.dark {
-  background-color: #0f172a;
-  color: #e2e8f0;
+html.dark body {
+  background-color: #0f172a; /* dark navy */
 }
 
-/* Accent blue for links and buttons */
-a, button {
-  transition: all 0.2s ease-in-out;
-}
-
-a:hover, button:hover {
-  filter: brightness(1.1);
-}
-
-/* Button base style */
+/* Accent blue for buttons and links */
 .btn-accent {
   background-color: #2563eb; /* blue-600 */
   color: white;
+  transition: all 0.2s ease-in-out;
 }
 
 .btn-accent:hover {
