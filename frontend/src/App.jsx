@@ -11,8 +11,10 @@ function App() {
   const [userName, setUserName] = useState(() =>
     window.localStorage.getItem("userName") || ""
   );
-  const [activeObjectId, setActiveObjectId] = useState(null); // which chat is open
-  const [theme, setTheme] = useState(() => window.localStorage.getItem("theme") || "light");
+  const [activeObjectId, setActiveObjectId] = useState(null);
+  const [theme, setTheme] = useState(() => {
+    return window.localStorage.getItem("theme") || "light";
+  });
 
   const isNewUser = useMemo(() => userName === "", [userName]);
 
@@ -28,6 +30,7 @@ function App() {
     window.localStorage.setItem("userName", name);
   }, []);
 
+  // Listen for localStorage changes (multi-tab sync)
   useEffect(() => {
     const onStorage = (e) => {
       if (e.key === "userName") {
@@ -41,7 +44,7 @@ function App() {
     return () => window.removeEventListener("storage", onStorage);
   }, []);
 
-  // theme handling: toggles `dark` class on html element and persists
+  // Apply theme to HTML and save
   useEffect(() => {
     const html = document.documentElement;
     if (theme === "dark") {
@@ -57,7 +60,7 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-black text-slate-900 dark:text-slate-100 transition-colors">
+    <div className="min-h-screen transition-colors">
       <Header
         userName={userName}
         onSubmit={logout}
@@ -66,7 +69,6 @@ function App() {
       />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Dashboard shows chats + a right panel for chat / upload */}
         <Dashboard
           userName={userName}
           activeObjectId={activeObjectId}
