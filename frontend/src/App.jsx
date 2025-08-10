@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import Header from "./components/Header";
-import Chat from "./components/Chat";
-import ImageUploader from "./components/ImageUploader";
+import Header from "./components/header";
+import Chat from "./components/chat";
+import ImageUploader from "./components/image";
 
 export default function App() {
   const [currentObjectId, setCurrentObjectId] = useState(null);
