@@ -4,6 +4,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const connectDB = require("./config/db"); // optional helper if you used it
 const cors = require("cors");
+const path = require("path");
 const uploadRoutes = require("./routes/uploadRoutes");
 const objectRoutes = require("./routes/objectRoutes");
 
