@@ -27,13 +27,21 @@ const Header = memo(function Header({ userName, onSubmit, theme, setTheme }) {
     onSubmit();
   };
 
-  // Make sure HTML theme matches prop on mount/update
+  // Theme change logic - applies full neon style in dark mode
   useEffect(() => {
     const html = document.documentElement;
     if (theme === "dark") {
       html.classList.add("dark");
+      document.body.style.background = "linear-gradient(135deg, #ff0044, #00ccff, #ffffff, #000000)";
+      document.body.style.backgroundSize = "400% 400%";
+      document.body.style.animation = "gradientBG 8s ease infinite";
+      document.body.style.color = "#ffffff";
     } else {
       html.classList.remove("dark");
+      document.body.style.background = "linear-gradient(135deg, #ff0000, #0000ff, #ffffff, #000000)";
+      document.body.style.backgroundSize = "400% 400%";
+      document.body.style.animation = "gradientBG 15s ease infinite";
+      document.body.style.color = "#000000";
     }
   }, [theme]);
 
