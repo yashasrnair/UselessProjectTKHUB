@@ -1,4 +1,5 @@
 import { useState } from "react";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 export default function ImageUploader({ onUploadComplete }) {
   const [file, setFile] = useState(null);
@@ -20,7 +21,7 @@ export default function ImageUploader({ onUploadComplete }) {
       formData.append("photo", file);
       formData.append("type", type);
 
-      const res = await fetch("http://localhost:3000/api/upload", {
+      const res = await fetch(`${API_BASE_URL}/api/upload`, {
         method: "POST",
         body: formData,
       });
