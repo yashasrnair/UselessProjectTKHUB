@@ -2,68 +2,34 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-/* frontend/src/App.css */
 
-/* Smooth gradient animation keyframes */
-@keyframes gradientBG {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
+/* Light mode */
+html {
+  background-color: #ffffff;
+  color: #111827;
 }
 
-/* Apply smooth transitions when toggling theme */
-html, body {
-  margin: 0;
-  padding: 0;
-  min-height: 100%;
-  font-family: sans-serif;
-  transition: background 0.8s ease, color 0.8s ease;
+/* Dark mode */
+html.dark {
+  background-color: #0f172a;
+  color: #e2e8f0;
 }
 
-/* Light theme defaults */
-body {
-  background: linear-gradient(135deg, #ff0000, #0000ff, #ffffff, #000000);
-  background-size: 400% 400%;
-  animation: gradientBG 15s ease infinite;
-  color: #000000;
+/* Accent blue for links and buttons */
+a, button {
+  transition: all 0.2s ease-in-out;
 }
 
-/* Dark theme defaults */
-html.dark body {
-  background: linear-gradient(135deg, #ff0044, #00ccff, #ffffff, #000000);
-  background-size: 400% 400%;
-  animation: gradientBG 8s ease infinite;
-  color: #ffffff;
+a:hover, button:hover {
+  filter: brightness(1.1);
 }
 
-/* Make sure main containers adjust */
-#root {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+/* Button base style */
+.btn-accent {
+  background-color: #2563eb; /* blue-600 */
+  color: white;
 }
 
-/* Links */
-a {
-  color: inherit;
-  text-decoration: none;
-  transition: color 0.3s ease;
-}
-
-/* Optional: Scrollbar styling */
-::-webkit-scrollbar {
-  width: 8px;
-}
-::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.3);
-  border-radius: 4px;
-}
-html.dark ::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.6);
+.btn-accent:hover {
+  background-color: #1d4ed8; /* blue-700 */
 }
