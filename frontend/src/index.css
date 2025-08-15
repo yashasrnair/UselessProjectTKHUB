@@ -6,17 +6,29 @@
 html.light {
   --bg-color: #ffffff;
   --text-color: #000000;
-  --accent-color: #2563eb; /* Tailwind blue-600 */
-  --card-bg: #f9fafb; /* Tailwind gray-50 */
-  --border-color: #e5e7eb; /* Tailwind gray-200 */
+  --accent-color: #2563eb;
+  --card-bg: #f9fafb;
+  --border-color: #e5e7eb;
+  --input-bg: #ffffff;
+  --input-text: #000000;
+  --button-bg: #2563eb;
+  --button-text: #ffffff;
+  --modal-bg: #ffffff;
+  --modal-text: #000000;
 }
 
 html.dark {
   --bg-color: #121212;
   --text-color: #ffffff;
-  --accent-color: #3b82f6; /* Tailwind blue-500 */
-  --card-bg: #1f2937; /* Tailwind gray-800 */
-  --border-color: #374151; /* Tailwind gray-700 */
+  --accent-color: #3b82f6;
+  --card-bg: #1f2937;
+  --border-color: #374151;
+  --input-bg: #1f2937;
+  --input-text: #ffffff;
+  --button-bg: #3b82f6;
+  --button-text: #121212;
+  --modal-bg: #1f2937;
+  --modal-text: #ffffff;
 }
 
 body {
@@ -33,6 +45,22 @@ body {
 }
 
 button {
+  background-color: var(--button-bg);
+  color: var(--button-text);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+input, select {
+  background-color: var(--input-bg);
+  color: var(--input-text);
+  border-color: var(--border-color);
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Modal */
+.modal {
+  background-color: var(--modal-bg);
+  color: var(--modal-text);
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
@@ -49,15 +77,4 @@ button {
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
-}
-
-/* Media query for system dark mode */
-@media (prefers-color-scheme: dark) {
-  html:not(.light) {
-    --bg-color: #121212;
-    --text-color: #ffffff;
-    --accent-color: #3b82f6;
-    --card-bg: #1f2937;
-    --border-color: #374151;
-  }
 }
