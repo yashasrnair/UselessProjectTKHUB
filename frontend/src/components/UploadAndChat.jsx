@@ -1,4 +1,3 @@
-// frontend/src/components/UploadAndChat.jsx
 import React, { useState } from "react";
 import Chat from "./Chat.jsx";
 
@@ -56,13 +55,13 @@ export default function UploadAndChat({ userName, onBack, onCreate }) {
   }
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl p-6 shadow border border-slate-200 dark:border-slate-800">
+    <div className="bg-white dark:bg-slate-900 rounded-xl p-6 shadow border border-slate-200 dark:border-slate-800 fade-in">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold">Upload & Create Chat</h3>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Upload & Create Chat</h3>
         {onBack && (
           <button
             onClick={onBack}
-            className="px-3 py-1 bg-gray-300 dark:bg-gray-700 rounded hover:bg-gray-400 dark:hover:bg-gray-600"
+            className="px-3 py-1 bg-gray-300 dark:bg-gray-700 text-gray-900 dark:text-white rounded hover:bg-gray-400 dark:hover:bg-gray-600 transition-colors duration-200"
           >
             ← Back
           </button>
@@ -73,7 +72,7 @@ export default function UploadAndChat({ userName, onBack, onCreate }) {
         <select
           value={type}
           onChange={(e) => setType(e.target.value)}
-          className="w-full px-4 py-2 rounded bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white"
+          className="w-full px-4 py-2 rounded bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 transition-colors duration-200"
         >
           <option value="plant">🌱 Plant</option>
           <option value="pet">🐾 Pet</option>
@@ -84,38 +83,38 @@ export default function UploadAndChat({ userName, onBack, onCreate }) {
           type="file"
           accept="image/*"
           onChange={(e) => setFile(e.target.files[0])}
-          className="w-full"
+          className="w-full text-gray-900 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700 transition-colors duration-200"
         />
 
         <button
           onClick={handleUpload}
           disabled={loading}
-          className="w-full px-4 py-3 bg-blue-600 text-white rounded hover:bg-blue-700"
+          className="w-full px-4 py-3 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 transition-colors duration-200"
         >
           {loading ? "Uploading..." : "Upload & Chat"}
         </button>
       </div>
 
       {showNamePrompt && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-slate-900 p-6 rounded-lg border border-slate-300 dark:border-slate-700 w-full max-w-sm">
-            <h3 className="text-lg font-bold mb-2">Name your object</h3>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 fade-in">
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-lg border border-slate-200 dark:border-slate-700 w-full max-w-sm">
+            <h3 className="text-lg font-bold mb-2 text-gray-900 dark:text-white">Name your object</h3>
             <input
               value={objName}
               onChange={(e) => setObjName(e.target.value)}
               placeholder="e.g. Pottery Pete"
-              className="w-full px-3 py-2 rounded mb-3 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white"
+              className="w-full px-3 py-2 rounded mb-3 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 transition-colors duration-200"
             />
             <div className="flex gap-2 justify-end">
               <button
                 onClick={saveNameAndEnterChat}
-                className="px-4 py-2 bg-blue-600 text-white rounded"
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors duration-200"
               >
                 Save & Chat
               </button>
               <button
                 onClick={() => { setShowNamePrompt(false); setPendingObjData(null); }}
-                className="px-4 py-2 bg-gray-400 dark:bg-gray-600 text-white rounded"
+                className="px-4 py-2 bg-gray-400 dark:bg-gray-600 text-white rounded hover:bg-gray-500 dark:hover:bg-gray-500 transition-colors duration-200"
               >
                 Cancel
               </button>
