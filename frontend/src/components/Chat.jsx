@@ -1,128 +1,105 @@
-// frontend/src/components/Chat.jsx
 import { useEffect, useRef, useState } from "react";
+
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 export default function Chat({ objectId, onClose }) {
-  const [objectMeta, setObjectMeta] = useState(null);
+  const [object, setObject] = useState(null);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [tokensLeft, setTokensLeft] = useState(null);
-  const [tokensUsed, setTokensUsed] = useState(0);
-  const messagesRef = useRef(null);
+  const messagesEndRef = useRef(null);
+
+  const fetchObject = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/objects/${objectId}`);
+      const data = await res.json();
+      setObject(data);
+      setMessages(data.messages || []);
+    } catch (err) {
+      console.error("Fetch error:", err);
+    }
+  };
 
   useEffect(() => {
-    const load = async () => {
-      try {
-        const res = await fetch(`${API_BASE_URL}/api/objects/${objectId}`);
-        if (!res.ok) throw new Error("Failed to load object");
-        const data = await res.json();
-        if (data.messages) setMessages(data.messages);
-        setTokensUsed(data.tokensUsed || 0);
-        setObjectMeta({ name: data.name, type: data.type, mood: data.mood });
-      } catch (err) {
-        console.error("Load object:", err);
-      }
-    };
-    if (objectId) load();
+    fetchObject();
   }, [objectId]);
 
   useEffect(() => {
-    if (messagesRef.current) {
-      messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
-    }
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // speech recognition (unchanged)
-  const startListening = () => {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) return alert("Speech recognition not supported in this browser.");
-    const rec = new SpeechRecognition();
-    rec.lang = "en-US";
-    rec.interimResults = false;
-    rec.onresult = (e) => setInput(e.results[0][0].transcript);
-    rec.onerror = (e) => console.error("Speech recognition error", e);
-    rec.start();
-  };
-
-  const speakText = (text) => {
-    if (!("speechSynthesis" in window)) return;
-    const utter = new SpeechSynthesisUtterance(text);
-    const voices = speechSynthesis.getVoices();
-    if (voices.length) utter.voice = voices[0];
-    utter.rate = 1;
-    speechSynthesis.speak(utter);
-  };
-
-  const sendMessage = async () => {
+  const handleSend = async (e) => {
+    e.preventDefault();
     if (!input.trim()) return;
-    setLoading(true);
-    setMessages((prev) => [...prev, { sender: "You", text: input }]);
-    const userMsg = input;
-    setInput("");
 
+    setLoading(true);
     try {
       const res = await fetch(`${API_BASE_URL}/api/objects/talk/${objectId}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: userMsg }),
+        body: JSON.stringify({ message: input }),
       });
       const data = await res.json();
-      if (data.error) {
-        setMessages((prev) => [...prev, { sender: "Error", text: data.error }]);
-      } else {
-        setMessages((prev) => [...prev, { sender: "Object", text: data.reply }]);
-        setTokensUsed(data.tokensUsed || tokensUsed);
-        setTokensLeft(data.tokensLeft);
-        speakText(data.reply);
+      if (data.reply) {
+        setMessages((prev) => [
+          ...prev,
+          { sender: "User", text: input },
+          { sender: "Object", text: data.reply },
+        ]);
+        setInput("");
       }
     } catch (err) {
-      console.error("Chat error:", err);
-      setMessages((prev) => [...prev, { sender: "Error", text: "Failed to connect to server." }]);
+      console.error("Send error:", err);
     } finally {
       setLoading(false);
     }
   };
 
-  const isExhausted = tokensLeft !== null && tokensLeft <= 0;
-
   return (
-    <div>
-      {/* header area for this chat */}
+    <div className="flex flex-col h-[70vh] transition-all duration-300">
       <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => onClose && onClose()}
-            className="px-3 py-1 rounded bg-slate-100 dark:bg-slate-800 text-sm"
-          >
-            ← Back
-          </button>
-          <div>
-            <div className="text-lg font-semibold">{objectMeta?.name || objectMeta?.type || "Chat"}</div>
-            <div className="text-sm text-slate-500 dark:text-slate-400">{objectMeta?.mood}</div>
-          </div>
-        </div>
-
-        <div className="text-sm text-slate-500 dark:text-slate-400">
-          Tokens used: {tokensUsed} • Left: {tokensLeft === null ? "—" : tokensLeft}
-        </div>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+          Chat with {object?.name || object?.type}
+        </h3>
+        <button
+          onClick={onClose}
+          className="px-3 py-1 bg-gray-300 dark:bg-gray-700 text-gray-900 dark:text-white rounded hover:bg-gray-400 dark:hover:bg-gray-600 transition-colors"
+        >
+          Close
+        </button>
       </div>
 
-      <div ref={messagesRef} className="h-[48vh] md:h-[56vh] overflow-y-auto bg-slate-50 dark:bg-slate-800 p-4 rounded mb-4">
-        {messages.map((m, i) => (
-          <div key={i} className={`mb-3 ${m.sender === "You" ? "text-cyan-700 dark:text-cyan-300" : m.sender === "Object" ? "text-slate-800 dark:text-purple-200" : "text-red-500"}`}>
-            <strong className="mr-2">{m.sender}:</strong> <span className="whitespace-pre-wrap">{m.text}</span>
+      <div className="flex-1 overflow-y-auto space-y-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 smooth-scroll">
+        {messages.map((msg, idx) => (
+          <div
+            key={idx}
+            className={`p-3 rounded-lg max-w-[80%] fade-in ${
+              msg.sender === "User"
+                ? "bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100 ml-auto"
+                : "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+            } transition-colors duration-200`}
+          >
+            {msg.text}
           </div>
         ))}
+        <div ref={messagesEndRef} />
       </div>
 
-      <div className="flex gap-2">
-        <button onClick={startListening} className="px-3 py-2 bg-cyan-500 text-white rounded">🎙️</button>
-        <input value={input} onChange={(e) => setInput(e.target.value)} disabled={isExhausted || loading} className="flex-1 px-3 py-2 rounded bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100" placeholder={isExhausted ? "Token quota exhausted" : "Say something..."} />
-        <button onClick={sendMessage} disabled={isExhausted || loading} className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded">{loading ? "..." : "Send"}</button>
-      </div>
-
-      {isExhausted && <div className="mt-3 text-red-400">Token quota exhausted. Create a new object or increase quota.</div>}
+      <form onSubmit={handleSend} className="mt-4 flex gap-2">
+        <input
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Type your message..."
+          className="flex-1 px-4 py-2 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200"
+        />
+        <button
+          type="submit"
+          disabled={loading}
+          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 transition-colors duration-200"
+        >
+          {loading ? "Sending..." : "Send"}
+        </button>
+      </form>
     </div>
   );
 }
