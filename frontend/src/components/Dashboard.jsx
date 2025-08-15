@@ -1,125 +1,111 @@
-// frontend/src/components/Dashboard.jsx
-import React, { useEffect, useState } from "react";
-import Chat from "./Chat.jsx";
+import { useEffect, useState } from "react";
 import UploadAndChat from "./UploadAndChat.jsx";
+import Chat from "./Chat.jsx";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 export default function Dashboard({ userName, activeObjectId, setActiveObjectId, onCreateNew }) {
-  const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [panelMode, setPanelMode] = useState("recent"); // recent | upload | chat
-  const [selectedObject, setSelectedObject] = useState(null);
+  const [panelMode, setPanelMode] = useState("recent");
+  const [objectList, setObjectList] = useState([]);
+  const [selectedObject, setSelectedObject] = useState(activeObjectId);
 
   const fetchList = async () => {
-    setLoading(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/api/objects/owner/${encodeURIComponent(userName)}`);
-      if (!res.ok) throw new Error("Failed to fetch");
+      const res = await fetch(`${API_BASE_URL}/api/objects/owner/${userName}`);
       const data = await res.json();
-      data.sort((a, b) => new Date(b.lastUpdated) - new Date(a.lastUpdated));
-      setItems(data);
+      setObjectList(data);
+      if (activeObjectId && !data.find((o) => o._id === activeObjectId)) {
+        setSelectedObject(null);
+        setActiveObjectId(null);
+        setPanelMode("recent");
+      }
     } catch (err) {
-      console.error("Failed load items:", err);
-    } finally {
-      setLoading(false);
+      console.error("Fetch error:", err);
     }
   };
 
   useEffect(() => {
     fetchList();
-    const t = setInterval(fetchList, 45000);
-    return () => clearInterval(t);
   }, [userName]);
 
   useEffect(() => {
     if (activeObjectId) {
-      setPanelMode("chat");
       setSelectedObject(activeObjectId);
+      setPanelMode("chat");
     }
   }, [activeObjectId]);
-
-  const openChat = (id) => {
-    setSelectedObject(id);
-    setPanelMode("chat");
-    setActiveObjectId(id);
-  };
 
   const handleUploadFlow = () => {
     setPanelMode("upload");
     setSelectedObject(null);
-    setActiveObjectId(null);
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {/* Left column */}
-      <aside className="lg:col-span-1 bg-white dark:bg-slate-900 rounded-xl p-4 shadow border border-slate-200 dark:border-slate-800">
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 min-h-[80vh] transition-all duration-300">
+      <aside className="md:col-span-1 bg-white dark:bg-slate-900 rounded-xl p-6 shadow border border-slate-200 dark:border-slate-800 overflow-y-auto max-h-[80vh]">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold">Your Chats</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Your Objects</h3>
           <button
             onClick={handleUploadFlow}
-            className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+            className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
           >
-            New Chat
+            New Object
           </button>
         </div>
-
-        <div className="space-y-3 max-h-[60vh] overflow-auto pr-2">
-          {loading && <div className="text-sm text-slate-500">Loading…</div>}
-
-          {!loading && items.length === 0 && (
-            <div className="text-sm text-slate-500">No chats yet — click New Chat above.</div>
-          )}
-
-          {items.map((it) => (
-            <div
-              key={it._id}
-              onClick={() => openChat(it._id)}
-              className={`cursor-pointer p-3 rounded-lg transition border ${
-                selectedObject === it._id
-                  ? "border-blue-500 shadow-md"
-                  : "border-transparent hover:border-slate-200 dark:hover:border-slate-800"
-              } bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-900`}
+        <ul className="space-y-2">
+          {objectList.map((obj) => (
+            <li
+              key={obj._id}
+              onClick={() => {
+                setSelectedObject(obj._id);
+                setPanelMode("chat");
+                setActiveObjectId(obj._id);
+              }}
+              className={`p-3 rounded cursor-pointer transition-colors ${
+                selectedObject === obj._id
+                  ? "bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100"
+                  : "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-700"
+              }`}
             >
-              <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                {obj.imageUrl && (
+                  <img
+                    src={`${API_BASE_URL}/${obj.imageUrl}`}
+                    alt={obj.name || obj.type}
+                    className="w-10 h-10 rounded object-cover"
+                  />
+                )}
                 <div>
-                  <div className="text-sm font-medium">{it.name || (it.type || "Object")}</div>
-                  <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                    {it.type} • {it.mood ? it.mood.slice(0, 80) : "No mood"}
-                  </div>
-                </div>
-                <div className="text-xs text-slate-400">
-                  {it.lastUpdated ? new Date(it.lastUpdated).toLocaleString() : ""}
+                  <p className="font-medium">{obj.name || obj.type}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 truncate">
+                    {obj.lastMessage || obj.mood || "No messages yet"}
+                  </p>
                 </div>
               </div>
-              {it.lastMessage && (
-                <div className="text-sm mt-2 text-slate-600 dark:text-slate-300">
-                  {it.lastMessage.slice(0, 120)}
-                </div>
-              )}
-            </div>
+            </li>
           ))}
-        </div>
+        </ul>
       </aside>
 
-      {/* Right column */}
-      <section className="lg:col-span-2">
+      <section className="md:col-span-3">
         {panelMode === "upload" && (
-          <UploadAndChat
-            userName={userName}
-            onBack={() => setPanelMode("recent")}
-            onCreate={(newId) => {
-              fetchList();
-              setSelectedObject(newId);
-              setPanelMode("chat");
-              setActiveObjectId(newId);
-            }}
-          />
+          <div className="fade-in bg-white dark:bg-slate-900 rounded-xl p-6 shadow border border-slate-200 dark:border-slate-800">
+            <UploadAndChat
+              userName={userName}
+              onBack={() => setPanelMode("recent")}
+              onCreate={(newId) => {
+                fetchList();
+                setSelectedObject(newId);
+                setPanelMode("chat");
+                setActiveObjectId(newId);
+                onCreateNew(newId);
+              }}
+            />
+          </div>
         )}
 
         {panelMode === "chat" && selectedObject && (
-          <div className="bg-white dark:bg-slate-900 rounded-xl p-6 shadow border border-slate-200 dark:border-slate-800">
+          <div className="fade-in bg-white dark:bg-slate-900 rounded-xl p-6 shadow border border-slate-200 dark:border-slate-800">
             <Chat
               objectId={selectedObject}
               onClose={() => {
@@ -133,15 +119,15 @@ export default function Dashboard({ userName, activeObjectId, setActiveObjectId,
         )}
 
         {panelMode === "recent" && !selectedObject && (
-          <div className="bg-white dark:bg-slate-900 rounded-xl p-8 h-full shadow border border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center">
-            <h2 className="text-2xl font-bold mb-2">Welcome back, {userName} 👋</h2>
+          <div className="fade-in bg-white dark:bg-slate-900 rounded-xl p-8 h-full shadow border border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center">
+            <h2 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white">Welcome back, {userName} 👋</h2>
             <p className="text-slate-600 dark:text-slate-300 max-w-xl text-center">
               Select a past chat to continue, or click below to upload an object and start chatting.
             </p>
             <div className="mt-6">
               <button
                 onClick={handleUploadFlow}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
               >
                 Upload & Chat
               </button>
