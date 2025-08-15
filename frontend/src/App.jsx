@@ -15,6 +15,7 @@ function App() {
     if (storedTheme) return storedTheme;
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? "dark" : "light";
   });
+  const [errorMessage, setErrorMessage] = useState(null);
 
   const isNewUser = useMemo(() => userName === "", [userName]);
 
@@ -53,6 +54,10 @@ function App() {
     window.localStorage.setItem("theme", theme);
   }, [theme]);
 
+  const showError = (msg) => {
+    setErrorMessage(msg);
+  };
+
   if (isNewUser) {
     return <Login onSubmit={handleUserName} />;
   }
@@ -71,8 +76,26 @@ function App() {
           activeObjectId={activeObjectId}
           setActiveObjectId={setActiveObjectId}
           onCreateNew={(newId) => setActiveObjectId(newId)}
+          onError={showError}
         />
       </main>
+
+      {errorMessage && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 fade-in">
+          <div className="modal p-6 rounded-lg border w-full max-w-sm shadow-lg">
+            <h3 className="text-lg font-bold mb-2">Error</h3>
+            <p>{errorMessage}</p>
+            <div className="flex justify-end mt-4">
+              <button
+                onClick={() => setErrorMessage(null)}
+                className="px-4 py-2 rounded hover:opacity-90 transition"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
