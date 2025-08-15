@@ -1,7 +1,5 @@
-// frontend/src/App.jsx
 import { useCallback, useEffect, useMemo, useState } from "react";
 import "./App.css";
-
 import Header from "./components/header.jsx";
 import UploadAndChat from "./components/UploadAndChat.jsx";
 import Login from "./components/login.jsx";
@@ -13,7 +11,9 @@ function App() {
   );
   const [activeObjectId, setActiveObjectId] = useState(null);
   const [theme, setTheme] = useState(() => {
-    return window.localStorage.getItem("theme") || "light";
+    const storedTheme = window.localStorage.getItem("theme");
+    if (storedTheme) return storedTheme;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? "dark" : "light";
   });
 
   const isNewUser = useMemo(() => userName === "", [userName]);
@@ -30,7 +30,6 @@ function App() {
     window.localStorage.setItem("userName", name);
   }, []);
 
-  // Listen for localStorage changes (multi-tab sync)
   useEffect(() => {
     const onStorage = (e) => {
       if (e.key === "userName") {
@@ -44,7 +43,6 @@ function App() {
     return () => window.removeEventListener("storage", onStorage);
   }, []);
 
-  // Apply theme to HTML and save
   useEffect(() => {
     const html = document.documentElement;
     if (theme === "dark") {
@@ -60,14 +58,13 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen transition-colors">
+    <div className="min-h-screen transition-colors duration-300">
       <Header
         userName={userName}
         onSubmit={logout}
         theme={theme}
         setTheme={setTheme}
       />
-
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Dashboard
           userName={userName}
