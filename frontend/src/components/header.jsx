@@ -1,4 +1,3 @@
-// frontend/src/components/header.jsx
 import React, { memo, useEffect } from "react";
 
 const menuRightItems = ["Logout"];
@@ -11,7 +10,7 @@ const MenuList = memo(function MenuList({ items, onLogoutClick }) {
           <a
             href="#"
             onClick={item === "Logout" ? onLogoutClick : undefined}
-            className="px-3 py-2 text-gray-700 dark:text-gray-200 hover:text-blue-600 hover:bg-gray-100 dark:hover:text-blue-400 dark:hover:bg-gray-800 rounded-md transition-colors"
+            className="px-3 py-2 text-gray-700 dark:text-gray-200 hover:text-blue-600 hover:bg-gray-100 dark:hover:text-blue-400 dark:hover:bg-gray-800 rounded-md transition-colors duration-200"
           >
             {item}
           </a>
@@ -27,7 +26,6 @@ const Header = memo(function Header({ userName, onSubmit, theme, setTheme }) {
     onSubmit();
   };
 
-  // Make sure HTML theme matches prop on mount/update
   useEffect(() => {
     const html = document.documentElement;
     if (theme === "dark") {
@@ -42,7 +40,7 @@ const Header = memo(function Header({ userName, onSubmit, theme, setTheme }) {
   };
 
   return (
-    <header className="w-full px-6 py-4 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm">
+    <header className="w-full px-6 py-4 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm transition-colors duration-300">
       <div className="flex items-center justify-between max-w-7xl mx-auto">
         <div className="flex items-center space-x-8">
           <h1 className="text-xl font-bold text-gray-900 dark:text-white">
@@ -53,7 +51,7 @@ const Header = memo(function Header({ userName, onSubmit, theme, setTheme }) {
         <div className="flex items-center space-x-6">
           <button
             onClick={toggleTheme}
-            className="p-2 rounded-full bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition"
+            className="p-2 rounded-full bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors duration-200"
           >
             {theme === "dark" ? (
               <svg
